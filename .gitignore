@@ -1,0 +1,14 @@
+# git ignore file for LCBot
+
+# 跟踪 .py类型的文件
+!*.py
+
+# 过滤以下类型的文件
+*.pyc
+*.pkl
+*.log
+*.swp
+.idea/
+.python-version
+data
+LCBot
