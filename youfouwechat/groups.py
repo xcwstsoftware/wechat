@@ -39,10 +39,10 @@ from timed_list import TimedList
 console_qr = True
 
 # 机器人昵称 (防止登错账号)
-bot_nick_name = 'test2'
+bot_nick_name = 'wxpy 机器人'
 
 # 入群口令
-group_code = 'test2'
+group_code = 'wxpy'
 
 # 管理员，可为多个，用于执行管理
 # 首个管理员为"系统管理员"，可接收异常日志和执行服务端操作
@@ -50,29 +50,31 @@ group_code = 'test2'
 
 admin_puids = (
     # 游否
-    '833e413c',
+    '83268c7c',
 )
 
 # 管理群
 # 仅为一个，用于接收心跳上报等次要信息
 
 # wxpy admins
-admin_group_puid = '05e89094'
+admin_group_puid = 'b0422972'
 
 # 需管理的微信群
 # 可为多个，机器人必须为群主，否则无法执行相应操作
 
 group_puids = (
     # wxpy 交流群 🐰
-    '12c8d2e2',
+    'de54017a',
     # wxpy 交流群 🐱
-     
+    'a99423ed',
     # wxpy 交流群 🐨
-    'adaa3a66',
+    '7cd56836',
+    # wxpy 交流群 🐹
+    '711605c5'
 )
 
 # 测试群，仅用于测试
-test_group_puid = 'aebf73be'
+test_group_puid = '808551a6'
 
 # 自动回答关键词
 kw_replies = {
@@ -95,27 +97,25 @@ welcome_text = '''🎉 欢迎 @{} 的加入！
 😃 请勿在本群使用机器人
 📖 提问前请看 t.cn/R6VkJDy'''
 
-help_info = '''wxpy 交流群
+help_info = '''😃 讨论主题
+· 本群主题为 wxpy 与 Python
+· 不限制其他话题，请区分优先级
+· 支持分享对群员有价值的信息
 
-[讨论主题]
-* 主要话题为 wxpy 与 Python
-* 不限制其他话题，但要分优先级
-* 支持分享对群员有价值的信息
+⚠️ 注意事项
+· 除群主外，勿在群内使用机器人
+· 严禁灰产/黑产相关内容话题
+· 请勿发布对群员无价值的广告
 
-[禁止事项]
-* 除群主外，勿在群内使用机器人
-* 严禁灰产/黑产相关话题内容
-* 请勿发布对群员无价值的广告
+👮 投票移出
+· 移出后将被拉黑 24 小时
+· 请在了解事因后谨慎投票
+· 命令格式: "移出 @人员"
 
-[投票移出]
-* 命令格式: "移出 @人员"
-* 请勿随意或恶意投票
-* 移除后将被加黑 30 分钟
-
-[实用链接]
-* 说明文档: url.cn/4660Oil
-* GitHub: url.cn/463SJb8
-* Gist: url.cn/49t5O4x
+🔧 实用链接
+· 文档: url.cn/4660Oil
+· 示例: url.cn/49t5O4x
+· 项目: url.cn/463SJb8
 '''
 
 # ---------------- 配置结束 ----------------
@@ -154,7 +154,7 @@ def _status_text():
     if globals().get('bot'):
         messages = bot.messages
     else:
-        messages = []
+        messages = list()
 
     return '[now] {now:%H:%M:%S}\n[uptime] {uptime}\n[memory] {memory}\n[messages] {messages}'.format(
         now=datetime.datetime.now(),
@@ -176,6 +176,7 @@ def remove_qr():
 start_new_thread(run_flask_app, (qr_path, _status_text))
 
 bot = Bot('bot.pkl', qr_callback=qr_callback, login_callback=remove_qr, logout_callback=_restart)
+bot.auto_mark_as_read = True
 
 if bot.self.name != bot_nick_name:
     logging.error('Wrong User!')
@@ -391,7 +392,7 @@ def invite(user):
                 group.add_members(user, use_invitation=True)
                 invite_counter.update([user])
             else:
-                user.send('你的受邀次数已达最大限制 [皱眉]')
+                user.send('你的受邀次数已达最大限制 😷')
 
 
 # 限制频率: 指定周期内超过消息条数，直接回复 "🙊"
@@ -467,7 +468,7 @@ def _kick(to_kick, limit_secs=0, msg=None):
         black_list.set(to_kick, limit_secs)
 
     to_kick.remove()
-    ret = '@{} 已被成功移出! [捂脸]'.format(to_kick.name)
+    ret = '@{} 已被成功移出! 😈'.format(to_kick.name)
 
     start_new_thread(try_send, kwargs=dict(chat=to_kick, msg=msg))
 
@@ -480,8 +481,8 @@ def _kick(to_kick, limit_secs=0, msg=None):
 
 
 def remote_kick(msg):
-    info_msg = '抱歉，你已被{}移出，接下来的 30 分钟内，机器人将对你保持沉默 [皱眉]'
-    limit_secs = 1800
+    info_msg = '抱歉，你已被{}移出，接下来的 24 小时内，机器人将对你保持沉默 😷'
+    limit_secs = 3600 * 24
 
     if msg.type is TEXT:
         match = rp_kick.search(msg.text)
@@ -489,12 +490,16 @@ def remote_kick(msg):
             name_to_kick = match.group(1)
 
             # Todo: 有重名时的多个选择
-            member_to_kick = ensure_one(msg.chat.search(name=name_to_kick))
+
+            try:
+                member_to_kick = ensure_one(msg.chat.search(name=name_to_kick))
+            except ValueError:
+                member_to_kick = ensure_one(msg.chat.search(nick_name=name_to_kick))
 
             if member_to_kick in admins:
                 logger.error('{} tried to kick {} whom was an admin'.format(
                     msg.member.name, member_to_kick.name))
-                return '无法移出管理员 @{} [皱眉]'.format(member_to_kick.name)
+                return '无法移出管理员 @{} 😷️'.format(member_to_kick.name)
 
             if from_admin(msg):
                 # 管理员: 直接踢出
@@ -512,13 +517,15 @@ def remote_kick(msg):
                         if voted >= 3:
                             _kick(
                                 msg.member, limit_secs,
-                                '抱歉，你因恶意投票而被移出。接下来的 30 分钟内，机器人将对你保持沉默 [悠闲]'
+                                '抱歉，你因恶意投票而被移出。接下来的 24 小时内，机器人将对你保持沉默 [悠闲]'
                             )
                             return '移出了恶意投票者 @{} [闪电]'.format(msg.member.name)
 
                 if votes < votes_to_kick:
-                    return '正在投票移出 @{}\n剩余投票时间: {:.0f} 秒\n当前票数: {} / {}'.format(
-                        name_to_kick, secs_left, votes, votes_to_kick)
+                    return '正在投票移出 @{}' \
+                           '\n当前 {} / {} 票 ({:.0f} 秒有效)' \
+                           '\n移出将拉黑 24 小时 😵' \
+                           '\n请谨慎投票 🤔'.format(name_to_kick, votes, votes_to_kick, secs_left)
                 else:
                     return _kick(member_to_kick, limit_secs, info_msg.format('投票'))
 
@@ -578,7 +585,12 @@ def exist_friends(msg):
 @bot.register(Friend, NOTE)
 def manually_added(msg):
     if '现在可以开始聊天了' in msg.text:
-        return '你好呀，{}，还记得咱们的入群口令吗？回复口令即可获取入群邀请。'.format(msg.chat.name)
+        # 对于好友验证信息为 wxpy 的，会等待邀请完成 (并计入 invite_counter)
+        # 对于好友验证信息不为 wxpy 的，延迟发送更容易引起注意
+        time.sleep(3)
+        with invite_lock:
+            if msg.chat not in invite_counter:
+                return '你好呀，{}，还记得咱们的入群口令吗？回复口令即可获取入群邀请。'.format(msg.chat.name)
 
 
 # 在其他群中回复被 @ 的消息
@@ -595,7 +607,7 @@ def wxpy_group(msg):
     kick_msg = remote_kick(msg)
     if kick_msg:
         return kick_msg
-    elif msg.text.lower().strip() in ('帮助', '说明', '规则', 'help', 'rule'):
+    elif msg.text.lower().strip() in ('帮助', '说明', '规则', 'help', 'rule', 'rules'):
         return help_info
     elif msg.is_at:
         return 'oops…\n本群禁止使用机器人[撇嘴]\n想我就私聊呗[害羞]'

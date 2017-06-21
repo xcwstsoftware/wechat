@@ -6,7 +6,7 @@ from wxpy import *
 '''
 使用 cache 来缓存登陆信息，同时使用控制台登陆
 '''
-bot = Bot('bot.pkl', console_qr=True)
+bot = Bot('bot.pkl', console_qr=False)
 
 
 '''
