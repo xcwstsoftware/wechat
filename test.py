@@ -70,6 +70,7 @@ def save(db):
     db['name'] = 'Hongten'
     db['gender'] = 'M'
     db['address'] = '广东省广州市'
+    db['isaddress'] = 'True'
     db.close()
 
 def fetchall(db):
@@ -77,7 +78,7 @@ def fetchall(db):
     print('遍历所有数据...')
     if db is not None:
         for key in db.keys():
-            print('{} = {}'.format(key, db[key]))
+            print('{} = {}'.format(key.decode('utf-8'), db[key].decode('utf-8')))
     else:
         print('dbm object is None!')
 
