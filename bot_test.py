@@ -47,7 +47,8 @@ admins = list(map(lambda x: bot.friends().search(puid=x)[0], admin_puids))
 # 远程踢人命令: 移出 @<需要被移出的人>
 rp_kick = re.compile(r'^(?:移出|移除|踢出|拉黑)\s*@(.+?)(?:\u2005?\s*$)')
 kick_votes = KickVotes(300)
-votes_to_kick = 3
+votes_to_kick = 5
+black_list = TimedList()
 
 # 下方为函数定义
 
@@ -114,8 +115,8 @@ def condition_invite(user):
 def from_admin(msg):
     """
     判断 msg 中的发送用户是否为管理员
-    :param msg: 
-    :return: 
+    :param msg:
+    :return:
     """
     if not isinstance(msg, Message):
         raise TypeError('expected Message, got {}'.format(type(msg)))
@@ -124,7 +125,7 @@ def from_admin(msg):
 
 '''
 远程踢人命令
-'''
+
 def remote_kick(msg):
     if msg.type is TEXT:
         match = rp_kick.search(msg.text)
@@ -148,9 +149,16 @@ def remote_kick(msg):
                 if member_to_kick in ready_to_kick_group:
                     ready_to_kick_group.remove_members(member_to_kick)
                     logger.error(get_time()+ str("【"+member_to_kick.name + "】 被系统自动移出 " +  ready_to_kick_group.name))
-           
-            return '成功移出 @{}'.format(member_to_kick.name)
 
+            return '成功移出 @{}'.format(member_to_kick.name)
+'''
+
+@dont_raise_response_error
+def try_send(chat, msg):
+    """尝试发送消息给指定聊天对象"""
+
+    if chat.is_friend:
+        chat.send(msg)
 
 def _kick(to_kick, limit_secs=0, msg=None):
     if limit_secs:
@@ -158,7 +166,7 @@ def _kick(to_kick, limit_secs=0, msg=None):
         black_list.set(to_kick, limit_secs)
 
     to_kick.remove()
-    ret = '@{} 已被成功移出! [捂脸]'.format(to_kick.name)
+    ret = '@{} 已被成功移出! 😈'.format(to_kick.name)
 
     start_new_thread(try_send, kwargs=dict(chat=to_kick, msg=msg))
 
@@ -170,24 +178,26 @@ def _kick(to_kick, limit_secs=0, msg=None):
     return ret
 
 
-
-def remote_kick_member(msg):
-    info_msg = '抱歉，你已被{}移出，接下来的 30 分钟内，机器人将对你保持沉默 [皱眉]'
-    limit_secs = 1800
+def remote_kick(msg):
+    info_msg = '抱歉，你已被{}移出，接下来的 24 小时内，机器人将对你保持沉默 😷'
+    limit_secs = 3600 * 24
 
     if msg.type is TEXT:
         match = rp_kick.search(msg.text)
         if match:
-            print('match=='+match)
             name_to_kick = match.group(1)
 
             # Todo: 有重名时的多个选择
-            member_to_kick = ensure_one(msg.chat.search(name=name_to_kick))
+
+            try:
+                member_to_kick = ensure_one(msg.chat.search(name=name_to_kick))
+            except ValueError:
+                member_to_kick = ensure_one(msg.chat.search(nick_name=name_to_kick))
 
             if member_to_kick in admins:
                 logger.error('{} tried to kick {} whom was an admin'.format(
                     msg.member.name, member_to_kick.name))
-                return '无法移出管理员 @{} [皱眉]'.format(member_to_kick.name)
+                return '无法移出管理员 @{} 😷️'.format(member_to_kick.name)
 
             if from_admin(msg):
                 # 管理员: 直接踢出
@@ -205,13 +215,15 @@ def remote_kick_member(msg):
                         if voted >= 3:
                             _kick(
                                 msg.member, limit_secs,
-                                '抱歉，你因恶意投票而被移出。接下来的 30 分钟内，机器人将对你保持沉默 [悠闲]'
+                                '抱歉，你因恶意投票而被移出。接下来的 24 小时内，机器人将对你保持沉默 [悠闲]'
                             )
                             return '移出了恶意投票者 @{} [闪电]'.format(msg.member.name)
 
                 if votes < votes_to_kick:
-                    return '正在投票移出 @{}\n剩余投票时间: {:.0f} 秒\n当前票数: {} / {}'.format(
-                        name_to_kick, secs_left, votes, votes_to_kick)
+                    return '正在投票移出 @{}' \
+                           '\n当前 {} / {} 票 ({:.0f} 秒有效)' \
+                           '\n移出将拉黑 24 小时 😵' \
+                           '\n请谨慎投票 🤔'.format(name_to_kick, votes, votes_to_kick, secs_left)
                 else:
                     return _kick(member_to_kick, limit_secs, info_msg.format('投票'))
 
@@ -266,7 +278,7 @@ def new_friends(msg):
     if msg.text.lower() in keyword_of_group.keys():
         invite(user, msg.text.lower())
     else:
-        user.send(invite_text) 
+        user.send(invite_text)
 
 global    msg_myfriend
 xiaobingmp = ensure_one(bot.mps().search('图灵机器人'))
@@ -311,7 +323,7 @@ def wxpy_group(msg):
             msg.forward(xiaobingmp)
 #            return "忙着呢，别烦我！";
             pass
-    elif msg.type is TEXT:       
+    elif msg.type is TEXT:
 #        print('msg.chat.puid'+msg.chat.puid)
         if sms_sent:
             if msg.chat.puid=='cf35394e':
@@ -325,7 +337,7 @@ def wxpy_group(msg):
             elif  msg.chat.puid=='bc7709e5':
                 msg_myfriend=msg
                 msg.forward(xiaobingmp)
-                pass   
+                pass
             pass
     elif msg.type is PICTURE:
         if sms_sent:
@@ -340,7 +352,7 @@ def wxpy_group(msg):
             elif  msg.chat.puid=='bc7709e5':
                 msg_myfriend=msg
                 msg.forward(xiaobingmp)
-                pass       
+                pass
             pass
 
 @bot.register(MP)
@@ -349,16 +361,16 @@ def auto_replymp(msg):
 #    print('222222222222222'+msg.text)
     global msg_myfriend
     if msg.type is TEXT:
-#        print('msg.text==='+msg.text)	
+#        print('msg.text==='+msg.text)
         msg.forward(msg_myfriend.chat)
-    elif msg.type is PICTURE: 
-        msg.forward(msg_myfriend.chat)   
+    elif msg.type is PICTURE:
+        msg.forward(msg_myfriend.chat)
  #      time.sleep(15)
  #       xiaoi.do_reply(msg)
  #       msg_myfriend=msg
- 
- 
- 
+
+
+
 @bot.register(groups, NOTE)
 def welcome(msg):
     name = get_new_member_name(msg)
