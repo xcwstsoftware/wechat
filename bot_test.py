@@ -8,6 +8,7 @@ from wxpy.utils import start_new_thread
 import time
 import os
 from kick_votes import KickVotes
+from timed_list import TimedList
 '''
 使用 cache 来缓存登陆信息，同时使用控制台登陆
 '''
@@ -18,7 +19,7 @@ bot.messages.max_history = 0
 
 # 定位公司群
 test2 = ensure_one(bot.groups().search('test2'))
-yiquntulv = ensure_one(bot.groups().search('一群秃驴'))
+yiquntulv = ensure_one(bot.groups().search('test2'))
 # 定位老板
 tao = ensure_one(test2.search('涛'))
 #tao.send('Hello WeChat!')
@@ -181,9 +182,11 @@ def _kick(to_kick, limit_secs=0, msg=None):
 def remote_kick(msg):
     info_msg = '抱歉，你已被{}移出，接下来的 24 小时内，机器人将对你保持沉默 😷'
     limit_secs = 3600 * 24
-
+    print('222222222222222'+msg.text)
     if msg.type is TEXT:
+        print('222222222222222'+msg.text)
         match = rp_kick.search(msg.text)
+        print('222222222222222vv')
         if match:
             name_to_kick = match.group(1)
 
@@ -301,6 +304,7 @@ sms_sent = False
 @bot.register(groups, except_self=False)
 def wxpy_group(msg):
     ret_msg = remote_kick_member(msg)
+    print('222222222222222'+msg.text)
     global    msg_myfriend
     if ret_msg:
         return ret_msg

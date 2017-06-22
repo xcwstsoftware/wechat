@@ -8,8 +8,8 @@
 其他用户的PUID 可以通过 执行 export_puid.py 生成 data 文件，在data 文件中获取
 '''
 admin_puids = (
-    '1a778aed',
-    'c24fcc29'
+    'da4d60e6',
+    'b361c1dd'
 )
 
 '''
@@ -17,11 +17,7 @@ admin_puids = (
 群的PUID 可以通过 执行 export_puid.py 生成 data 文件，在data 文件中获取
 '''
 group_puids = (
-     'cf35394e',
-     '04fcd359',
-     'a8ce4ac4',
-     '7c165c51',
-     'bc7709e5',     
+     'd474f828',     
 )
 
  # 新人入群的欢迎语
