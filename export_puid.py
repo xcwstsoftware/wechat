@@ -16,7 +16,6 @@ bot.enable_puid('wxpy_puid.pkl')
 
 friends = bot.friends()
 groups = bot.groups()
-
 with  open('data', 'w',encoding='UTF-8') as output:
     output.write("-----Bots-------\n")
     output.write(str(bot.self.name + '--->'+ bot.self.puid + "\n"))
@@ -27,7 +26,6 @@ with  open('data', 'w',encoding='UTF-8') as output:
     output.write("-----Groups-------\n")
     for i in groups:
         output.write(str(i.name + " ---> " + i.puid + "\n"))
-
 print("数据输出成功！")
 
 
