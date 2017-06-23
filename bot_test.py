@@ -9,6 +9,7 @@ import time
 import os
 from kick_votes import KickVotes
 from timed_list import TimedList
+from dbm_util import *
 '''
 使用 cache 来缓存登陆信息，同时使用控制台登陆
 '''
@@ -24,7 +25,8 @@ yiquntulv = ensure_one(bot.groups().search('test2'))
 tao = ensure_one(test2.search('涛'))
 #tao.send('Hello WeChat!')
 xiaoi = XiaoI('tAhK6zpeONOs', 'MNdtLQ7ic90kU33WUlsn')
-
+print(sys.path[0]+'\\Hongten.pag')
+db = dbm.open(sys.path[0]+'\\puid_key_value.pag', 'c')
 
 '''
 开启 PUID 用于后续的控制
@@ -182,11 +184,9 @@ def _kick(to_kick, limit_secs=0, msg=None):
 def remote_kick(msg):
     info_msg = '抱歉，你已被{}移出，接下来的 24 小时内，机器人将对你保持沉默 😷'
     limit_secs = 3600 * 24
-    print('222222222222222'+msg.text)
     if msg.type is TEXT:
-        print('222222222222222'+msg.text)
+        print('remote_kick'+msg.text)
         match = rp_kick.search(msg.text)
-        print('222222222222222vv')
         if match:
             name_to_kick = match.group(1)
 
@@ -298,8 +298,26 @@ def exist_friends(msg):
             msg.forward(xiaobingmp)
             pass
 #            return invite_text
-
-sms_sent = False
+@bot.register(Group)
+def reply_groups(msg):
+    global    msg_myfriend
+    if '开启聊天' in msg.text.lower():
+        db[msg.chat.puid]='True'
+        return  '开启聊天'
+    if '开启装逼' in msg.text.lower():
+        db[msg.chat.puid]='True'
+        return  '开启装逼'
+    if '关闭聊天' in msg.text.lower():
+        db[msg.chat.puid]='False'
+        return  '关闭聊天'
+    if msg.sender.name.find("黑名单") != -1:
+        return "您已被拉黑！"
+    else:
+        if db[msg.chat.puid] == 'True':
+            msg_myfriend=msg
+            msg.forward(xiaobingmp)
+            pass
+#            return invite_text
 # 管理群内的消息处理
 @bot.register(groups, except_self=False)
 def wxpy_group(msg):
@@ -311,13 +329,13 @@ def wxpy_group(msg):
     elif  msg.is_at:
         global sms_sent
         if '开启聊天' in msg.text.lower():
-            sms_sent=True
+            db[msg.chat.puid]='True'
             return  '开启聊天'
         if '开启装逼' in msg.text.lower():
-            sms_sent=True
+            db[msg.chat.puid]='True'
             return  '开启装逼'
         if '关闭聊天' in msg.text.lower():
-            sms_sent=False
+            db[msg.chat.puid]='False'
             return  '关闭聊天'
         if turing_key :
             tuling = Tuling(api_key=turing_key)
@@ -329,34 +347,14 @@ def wxpy_group(msg):
             pass
     elif msg.type is TEXT:
 #        print('msg.chat.puid'+msg.chat.puid)
-        if sms_sent:
-            if msg.chat.puid=='cf35394e':
-                msg_myfriend=msg
-                msg.forward(xiaobingmp)
-                pass
-            elif  msg.chat==yiquntulv:
-                msg_myfriend=msg
-                msg.forward(xiaobingmp)
-                pass
-            elif  msg.chat.puid=='bc7709e5':
-                msg_myfriend=msg
-                msg.forward(xiaobingmp)
-                pass
+        if db[msg.chat.puid] == 'True':
+            msg_myfriend=msg
+            msg.forward(xiaobingmp)
             pass
     elif msg.type is PICTURE:
-        if sms_sent:
-            if msg.chat.puid=='cf35394e':
-                msg_myfriend=msg
-                msg.forward(xiaobingmp)
-                pass
-            elif  msg.chat==yiquntulv:
-                msg_myfriend=msg
-                msg.forward(xiaobingmp)
-                pass
-            elif  msg.chat.puid=='bc7709e5':
-                msg_myfriend=msg
-                msg.forward(xiaobingmp)
-                pass
+        if db[msg.chat.puid] == 'True':
+            msg_myfriend=msg
+            msg.forward(xiaobingmp)
             pass
 
 @bot.register(MP)
