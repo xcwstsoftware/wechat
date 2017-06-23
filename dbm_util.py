@@ -59,8 +59,8 @@ import dbm
 
 '''
 
-#print(sys.path[0]+'\\Hongten.pag')
-#db = dbm.open(sys.path[0]+'\\Hongten.pag', 'c')
+print(sys.path[0]+'\\Hongten.pag')
+db = dbm.open(sys.path[0]+'\\Hongten.pag', 'c')
 
 def get_dbm():
     '''Open database, creating it if necessary.'''
@@ -108,7 +108,7 @@ def deleteall(db):
             del db[key]
     else:
         print('dbm object is None!')
-'''
+
 def main():
     db = get_dbm()
     save(db)
@@ -121,9 +121,19 @@ def main():
 #    delete(db, 'gender')
     fetchall(db)
     print('#' * 50)
+#    print(db['ssssssssssssssssssssss'])
+    try:
+        db['sss']
+        pass
+    except :
+        db['sss']='True'
+        pass
+    else:
+        pass
+    finally:
+        pass
 #    deleteall(db)
     fetchall(db)
 
 if __name__ == '__main__':
     main()
-'''

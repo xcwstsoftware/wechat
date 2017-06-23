@@ -269,6 +269,24 @@ def invite(user, keyword):
     else:
         user.send("该群状态有误，您换个关键词试试？")
 
+
+
+# 判断消息是否为支持回复的消息类型
+def supported_msg_type(msg, reply_unsupported=False):
+    supported = (TEXT,PICTURE,)
+    ignored = (SYSTEM, NOTE, FRIENDS)
+
+    fallback_replies = {
+        RECORDING: '🙉',
+        VIDEO: '🙈',
+    }
+
+    if msg.type in supported:
+        return True
+    elif (msg.type not in ignored) and reply_unsupported:
+        msg.reply(fallback_replies.get(msg.type, '🐒'))
+
+
 # 下方为消息处理
 
 '''
@@ -288,19 +306,26 @@ xiaobingmp = ensure_one(bot.mps().search('图灵机器人'))
 @bot.register(Friend)
 def exist_friends(msg):
     global    msg_myfriend
-    if msg.sender.name.find("黑名单") != -1:
-        return "您已被拉黑！"
-    else:
-        if msg.text.lower() in keyword_of_group.keys():
-            invite(msg.sender, msg.text.lower())
+    if supported_msg_type(msg, reply_unsupported=True):
+        if msg.sender.name.find("黑名单") != -1:
+            return "您已被拉黑！"
         else:
-            msg_myfriend=msg
-            msg.forward(xiaobingmp)
-            pass
+            if msg.text.lower() in keyword_of_group.keys():
+                invite(msg.sender, msg.text.lower())
+            else:
+                msg_myfriend=msg
+                msg.forward(xiaobingmp)
+                pass
 #            return invite_text
 @bot.register(Group)
 def reply_groups(msg):
     global    msg_myfriend
+    try:
+        db[msg.chat.puid]
+        pass
+    except :
+        db[msg.chat.puid]='False'
+        pass
     if '开启聊天' in msg.text.lower():
         db[msg.chat.puid]='True'
         return  '开启聊天'
@@ -314,8 +339,9 @@ def reply_groups(msg):
         return "您已被拉黑！"
     else:
         if db[msg.chat.puid] == 'True':
-            msg_myfriend=msg
-            msg.forward(xiaobingmp)
+            if supported_msg_type(msg, reply_unsupported=True):
+                msg_myfriend=msg
+                msg.forward(xiaobingmp)
             pass
 #            return invite_text
 # 管理群内的消息处理
@@ -324,6 +350,12 @@ def wxpy_group(msg):
     ret_msg = remote_kick_member(msg)
     print('222222222222222'+msg.text)
     global    msg_myfriend
+    try:
+        db[msg.chat.puid]
+        pass
+    except :
+        db[msg.chat.puid]='False'
+        pass
     if ret_msg:
         return ret_msg
     elif  msg.is_at:
@@ -341,20 +373,23 @@ def wxpy_group(msg):
             tuling = Tuling(api_key=turing_key)
             tuling.do_reply(msg)
         else:
-            msg_myfriend=msg
-            msg.forward(xiaobingmp)
+            if supported_msg_type(msg, reply_unsupported=True):
+                msg_myfriend=msg
+                msg.forward(xiaobingmp)
 #            return "忙着呢，别烦我！";
-            pass
+                pass
     elif msg.type is TEXT:
 #        print('msg.chat.puid'+msg.chat.puid)
         if db[msg.chat.puid] == 'True':
-            msg_myfriend=msg
-            msg.forward(xiaobingmp)
+            if supported_msg_type(msg, reply_unsupported=True):
+                msg_myfriend=msg
+                msg.forward(xiaobingmp)
             pass
     elif msg.type is PICTURE:
         if db[msg.chat.puid] == 'True':
-            msg_myfriend=msg
-            msg.forward(xiaobingmp)
+            if supported_msg_type(msg, reply_unsupported=True):
+                msg_myfriend=msg
+                msg.forward(xiaobingmp)
             pass
 
 @bot.register(MP)
