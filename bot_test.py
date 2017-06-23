@@ -9,7 +9,7 @@ import time
 import os
 from kick_votes import KickVotes
 from timed_list import TimedList
-from dbm_util import *
+import dbm
 '''
 使用 cache 来缓存登陆信息，同时使用控制台登陆
 '''
