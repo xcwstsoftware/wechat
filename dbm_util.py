@@ -59,12 +59,12 @@ import dbm
 
 '''
 
-print(sys.path[0]+'\\Hongten.pag')
-db = dbm.open(sys.path[0]+'\\Hongten.pag', 'c')
+print(sys.path[0]+'\\puid_key_value.pag')
+db = dbm.open(sys.path[0]+'\\puid_key_value.pag', 'c')
 
 def get_dbm():
     '''Open database, creating it if necessary.'''
-    return dbm.open(sys.path[0]+'\\Hongten.pag', 'c')
+    return dbm.open(sys.path[0]+'\\puid_key_value.pag', 'c')
 
 def save(db):
     '''保存数据'''

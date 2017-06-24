@@ -10,6 +10,7 @@ import os
 from kick_votes import KickVotes
 from timed_list import TimedList
 import dbm
+#from dbm_util  import *
 '''
 使用 cache 来缓存登陆信息，同时使用控制台登陆
 '''
@@ -25,7 +26,7 @@ yiquntulv = ensure_one(bot.groups().search('test2'))
 tao = ensure_one(test2.search('涛'))
 #tao.send('Hello WeChat!')
 xiaoi = XiaoI('tAhK6zpeONOs', 'MNdtLQ7ic90kU33WUlsn')
-print(sys.path[0]+'\\Hongten.pag')
+print(sys.path[0]+'\\puid_key_value.pag')
 db = dbm.open(sys.path[0]+'\\puid_key_value.pag', 'c')
 
 '''
@@ -324,7 +325,7 @@ def reply_groups(msg):
         db[msg.chat.puid]
         pass
     except :
-        db[msg.chat.puid]='False'
+        db[msg.chat.puid]='aaaa'
         pass
     if '开启聊天' in msg.text.lower():
         db[msg.chat.puid]='True'
@@ -345,29 +346,32 @@ def reply_groups(msg):
             pass
 #            return invite_text
 # 管理群内的消息处理
-@bot.register(groups, except_self=False)
+@bot.register(groups, except_self=True)
 def wxpy_group(msg):
-    ret_msg = remote_kick_member(msg)
+    ret_msg = remote_kick(msg)
     print('222222222222222'+msg.text)
     global    msg_myfriend
     try:
+        print('222222eeeeeeeee'+msg.text)
         db[msg.chat.puid]
+        print('tttttt'+msg.text)
         pass
     except :
-        db[msg.chat.puid]='False'
+        print('dfsdfdf'+msg.text)
+        db[msg.chat.puid]='aaaa'
         pass
     if ret_msg:
         return ret_msg
     elif  msg.is_at:
         global sms_sent
         if '开启聊天' in msg.text.lower():
-            db[msg.chat.puid]='True'
+            db[msg.chat.puid]='bbbb'
             return  '开启聊天'
         if '开启装逼' in msg.text.lower():
-            db[msg.chat.puid]='True'
+            db[msg.chat.puid]='bbbb'
             return  '开启装逼'
         if '关闭聊天' in msg.text.lower():
-            db[msg.chat.puid]='False'
+            db[msg.chat.puid]='aaaa'
             return  '关闭聊天'
         if turing_key :
             tuling = Tuling(api_key=turing_key)
@@ -380,13 +384,19 @@ def wxpy_group(msg):
                 pass
     elif msg.type is TEXT:
 #        print('msg.chat.puid'+msg.chat.puid)
-        if db[msg.chat.puid] == 'True':
+        print('222111222222222222222'+msg.text)
+        print('222111222222222222222'+msg.chat.puid)
+        print('vvv222111222222222222222'+db[msg.chat.puid])
+        print('sadsdf222111222222222222222'+db[msg.chat.puid.decode('utf-8')].decode('utf-8'))
+        print('222111222222222222222'+db[msg.chat.puid].decode('utf-8'))
+        if db[msg.chat.puid] == 'bbbb':
+            print('111222222222222222'+msg.text)
             if supported_msg_type(msg, reply_unsupported=True):
                 msg_myfriend=msg
                 msg.forward(xiaobingmp)
             pass
     elif msg.type is PICTURE:
-        if db[msg.chat.puid] == 'True':
+        if db[msg.chat.puid] == 'bbbb':
             if supported_msg_type(msg, reply_unsupported=True):
                 msg_myfriend=msg
                 msg.forward(xiaobingmp)
