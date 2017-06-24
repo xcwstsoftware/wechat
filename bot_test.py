@@ -321,57 +321,66 @@ def exist_friends(msg):
 @bot.register(Group)
 def reply_groups(msg):
     global    msg_myfriend
+    print('cccccccccccccc')
     try:
         db[msg.chat.puid]
         pass
     except :
-        db[msg.chat.puid]='aaaa'
-        pass
-    if '开启聊天' in msg.text.lower():
-        db[msg.chat.puid]='True'
-        return  '开启聊天'
-    if '开启装逼' in msg.text.lower():
-        db[msg.chat.puid]='True'
-        return  '开启装逼'
-    if '关闭聊天' in msg.text.lower():
         db[msg.chat.puid]='False'
-        return  '关闭聊天'
+        pass
+    if msg.type is TEXT:
+        
+        if '开启聊天' in msg.text.lower():
+            db[msg.chat.puid]='True'
+            return  '开启聊天'
+        if '开启装逼' in msg.text.lower():
+            db[msg.chat.puid]='True'
+            return  '开启装逼'
+        if '关闭聊天' in msg.text.lower():
+            db[msg.chat.puid]='False'
+            return  '关闭聊天'
+        print('222cccccccccccccc')
+        pass
     if msg.sender.name.find("黑名单") != -1:
+        print('11cccccccccccccc')
         return "您已被拉黑！"
     else:
-        if db[msg.chat.puid] == 'True':
+        if db[msg.chat.puid].decode('utf-8') == 'True':
             if supported_msg_type(msg, reply_unsupported=True):
+                print('222111222222222222222vvv')
                 msg_myfriend=msg
                 msg.forward(xiaobingmp)
             pass
+
 #            return invite_text
 # 管理群内的消息处理
 @bot.register(groups, except_self=True)
 def wxpy_group(msg):
+    print('222222222222222'+msg.type)
     ret_msg = remote_kick(msg)
-    print('222222222222222'+msg.text)
+    print('222222222222222'+msg.type)
     global    msg_myfriend
     try:
-        print('222222eeeeeeeee'+msg.text)
+        print('222222eeeeeeeee'+msg.type)
         db[msg.chat.puid]
-        print('tttttt'+msg.text)
+        print('tttttt'+msg.type)
         pass
     except :
         print('dfsdfdf'+msg.text)
-        db[msg.chat.puid]='aaaa'
+        db[msg.chat.puid]='False'
         pass
     if ret_msg:
         return ret_msg
     elif  msg.is_at:
         global sms_sent
         if '开启聊天' in msg.text.lower():
-            db[msg.chat.puid]='bbbb'
+            db[msg.chat.puid]='True'
             return  '开启聊天'
         if '开启装逼' in msg.text.lower():
-            db[msg.chat.puid]='bbbb'
+            db[msg.chat.puid]='True'
             return  '开启装逼'
         if '关闭聊天' in msg.text.lower():
-            db[msg.chat.puid]='aaaa'
+            db[msg.chat.puid]='False'
             return  '关闭聊天'
         if turing_key :
             tuling = Tuling(api_key=turing_key)
@@ -386,18 +395,21 @@ def wxpy_group(msg):
 #        print('msg.chat.puid'+msg.chat.puid)
         print('222111222222222222222'+msg.text)
         print('222111222222222222222'+msg.chat.puid)
-        print('vvv222111222222222222222'+db[msg.chat.puid])
-        print('sadsdf222111222222222222222'+db[msg.chat.puid.decode('utf-8')].decode('utf-8'))
+        print('vvv222111222222222222222'+db[msg.chat.puid].decode('utf-8'))
+#         print('sadsdf222111222222222222222'+db[msg.chat.puid.decode('utf-8')].decode('utf-8'))
         print('222111222222222222222'+db[msg.chat.puid].decode('utf-8'))
-        if db[msg.chat.puid] == 'bbbb':
+        if db[msg.chat.puid].decode('utf-8') == 'True':
             print('111222222222222222'+msg.text)
             if supported_msg_type(msg, reply_unsupported=True):
                 msg_myfriend=msg
                 msg.forward(xiaobingmp)
             pass
     elif msg.type is PICTURE:
-        if db[msg.chat.puid] == 'bbbb':
+        print('ssssssssssss2')
+        if db[msg.chat.puid].decode('utf-8') == 'True':
+            print('vvvvvvvvvvvv')
             if supported_msg_type(msg, reply_unsupported=True):
+                print('tttttttttt')
                 msg_myfriend=msg
                 msg.forward(xiaobingmp)
             pass
