@@ -9,6 +9,8 @@ import time
 import os
 from kick_votes import KickVotes
 from timed_list import TimedList
+import dbm
+#from dbm_util  import *
 '''
 使用 cache 来缓存登陆信息，同时使用控制台登陆
 '''
@@ -24,7 +26,8 @@ yiquntulv = ensure_one(bot.groups().search('test2'))
 tao = ensure_one(test2.search('涛'))
 #tao.send('Hello WeChat!')
 xiaoi = XiaoI('tAhK6zpeONOs', 'MNdtLQ7ic90kU33WUlsn')
-
+print(sys.path[0]+'\\puid_key_value.pag')
+db = dbm.open(sys.path[0]+'\\puid_key_value.pag', 'c')
 
 '''
 开启 PUID 用于后续的控制
@@ -182,11 +185,9 @@ def _kick(to_kick, limit_secs=0, msg=None):
 def remote_kick(msg):
     info_msg = '抱歉，你已被{}移出，接下来的 24 小时内，机器人将对你保持沉默 😷'
     limit_secs = 3600 * 24
-    print('222222222222222'+msg.text)
     if msg.type is TEXT:
-        print('222222222222222'+msg.text)
+        print('remote_kick'+msg.text)
         match = rp_kick.search(msg.text)
-        print('222222222222222vv')
         if match:
             name_to_kick = match.group(1)
 
@@ -269,6 +270,24 @@ def invite(user, keyword):
     else:
         user.send("该群状态有误，您换个关键词试试？")
 
+
+
+# 判断消息是否为支持回复的消息类型
+def supported_msg_type(msg, reply_unsupported=False):
+    supported = (TEXT,PICTURE,)
+    ignored = (SYSTEM, NOTE, FRIENDS)
+
+    fallback_replies = {
+        RECORDING: '🙉',
+        VIDEO: '🙈',
+    }
+
+    if msg.type in supported:
+        return True
+    elif (msg.type not in ignored) and reply_unsupported:
+        msg.reply(fallback_replies.get(msg.type, '🐒'))
+
+
 # 下方为消息处理
 
 '''
@@ -288,75 +307,111 @@ xiaobingmp = ensure_one(bot.mps().search('图灵机器人'))
 @bot.register(Friend)
 def exist_friends(msg):
     global    msg_myfriend
+    if supported_msg_type(msg, reply_unsupported=True):
+        if msg.sender.name.find("黑名单") != -1:
+            return "您已被拉黑！"
+        else:
+            if msg.text.lower() in keyword_of_group.keys():
+                invite(msg.sender, msg.text.lower())
+            else:
+                msg_myfriend=msg
+                msg.forward(xiaobingmp)
+                pass
+#            return invite_text
+@bot.register(Group)
+def reply_groups(msg):
+    global    msg_myfriend
+    print('cccccccccccccc')
+    try:
+        db[msg.chat.puid]
+        pass
+    except :
+        db[msg.chat.puid]='False'
+        pass
+    if msg.type is TEXT:
+        
+        if '开启聊天' in msg.text.lower():
+            db[msg.chat.puid]='True'
+            return  '开启聊天'
+        if '开启装逼' in msg.text.lower():
+            db[msg.chat.puid]='True'
+            return  '开启装逼'
+        if '关闭聊天' in msg.text.lower():
+            db[msg.chat.puid]='False'
+            return  '关闭聊天'
+        print('222cccccccccccccc')
+        pass
     if msg.sender.name.find("黑名单") != -1:
+        print('11cccccccccccccc')
         return "您已被拉黑！"
     else:
-        if msg.text.lower() in keyword_of_group.keys():
-            invite(msg.sender, msg.text.lower())
-        else:
-            msg_myfriend=msg
-            msg.forward(xiaobingmp)
+        if db[msg.chat.puid].decode('utf-8') == 'True':
+            if supported_msg_type(msg, reply_unsupported=True):
+                print('222111222222222222222vvv')
+                msg_myfriend=msg
+                msg.forward(xiaobingmp)
             pass
-#            return invite_text
 
-sms_sent = False
+#            return invite_text
 # 管理群内的消息处理
-@bot.register(groups, except_self=False)
+@bot.register(groups, except_self=True)
 def wxpy_group(msg):
-    ret_msg = remote_kick_member(msg)
-    print('222222222222222'+msg.text)
+    print('222222222222222'+msg.type)
+    ret_msg = remote_kick(msg)
+    print('222222222222222'+msg.type)
     global    msg_myfriend
+    try:
+        print('222222eeeeeeeee'+msg.type)
+        db[msg.chat.puid]
+        print('tttttt'+msg.type)
+        pass
+    except :
+        print('dfsdfdf'+msg.text)
+        db[msg.chat.puid]='False'
+        pass
     if ret_msg:
         return ret_msg
     elif  msg.is_at:
         global sms_sent
         if '开启聊天' in msg.text.lower():
-            sms_sent=True
+            db[msg.chat.puid]='True'
             return  '开启聊天'
         if '开启装逼' in msg.text.lower():
-            sms_sent=True
+            db[msg.chat.puid]='True'
             return  '开启装逼'
         if '关闭聊天' in msg.text.lower():
-            sms_sent=False
+            db[msg.chat.puid]='False'
             return  '关闭聊天'
         if turing_key :
             tuling = Tuling(api_key=turing_key)
             tuling.do_reply(msg)
         else:
-            msg_myfriend=msg
-            msg.forward(xiaobingmp)
+            if supported_msg_type(msg, reply_unsupported=True):
+                msg_myfriend=msg
+                msg.forward(xiaobingmp)
 #            return "忙着呢，别烦我！";
-            pass
+                pass
     elif msg.type is TEXT:
 #        print('msg.chat.puid'+msg.chat.puid)
-        if sms_sent:
-            if msg.chat.puid=='cf35394e':
+        print('222111222222222222222'+msg.text)
+        print('222111222222222222222'+msg.chat.puid)
+        print('vvv222111222222222222222'+db[msg.chat.puid].decode('utf-8'))
+#         print('sadsdf222111222222222222222'+db[msg.chat.puid.decode('utf-8')].decode('utf-8'))
+        print('222111222222222222222'+db[msg.chat.puid].decode('utf-8'))
+        if db[msg.chat.puid].decode('utf-8') == 'True':
+            print('111222222222222222'+msg.text)
+            if supported_msg_type(msg, reply_unsupported=True):
                 msg_myfriend=msg
                 msg.forward(xiaobingmp)
-                pass
-            elif  msg.chat==yiquntulv:
-                msg_myfriend=msg
-                msg.forward(xiaobingmp)
-                pass
-            elif  msg.chat.puid=='bc7709e5':
-                msg_myfriend=msg
-                msg.forward(xiaobingmp)
-                pass
             pass
     elif msg.type is PICTURE:
-        if sms_sent:
-            if msg.chat.puid=='cf35394e':
+        print('ssssssssssss2')
+        if db[msg.chat.puid].decode('utf-8') == 'True':
+            print('vvvvvvvvvvvv')
+            if supported_msg_type(msg, reply_unsupported=True):
+                print('tttttttttt')
                 msg_myfriend=msg
                 msg.forward(xiaobingmp)
-                pass
-            elif  msg.chat==yiquntulv:
-                msg_myfriend=msg
-                msg.forward(xiaobingmp)
-                pass
-            elif  msg.chat.puid=='bc7709e5':
-                msg_myfriend=msg
-                msg.forward(xiaobingmp)
-                pass
             pass
 
 @bot.register(MP)
