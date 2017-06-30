@@ -3,7 +3,7 @@ import smtplib #加载smtplib模块
 from email.mime.text import MIMEText
 from email.utils import formataddr
 my_sender='wst584412572@163.com' #发件人邮箱账号，为了后面易于维护，所以写成了变量
-my_user='294770971@qq.com' #收件人邮箱账号，为了后面易于维护，所以写成了变量
+my_user='294770971@qq.com,584412572@qq.com' #收件人邮箱账号，为了后面易于维护，所以写成了变量
 def mail():
   ret=True
   try:
