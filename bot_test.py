@@ -306,6 +306,9 @@ global    msg_myfriend
 xiaobingmp = ensure_one(bot.mps().search('图灵机器人'))
 @bot.register(Friend)
 def exist_friends(msg):
+    reply_help_result = reply_help(msg)
+    if reply_help_result:
+        return reply_help_result
     global    msg_myfriend
     if supported_msg_type(msg, reply_unsupported=True):
         if msg.sender.name.find("黑名单") != -1:
@@ -320,6 +323,9 @@ def exist_friends(msg):
 #            return invite_text
 @bot.register(Group)
 def reply_groups(msg):
+    reply_help_result = reply_help(msg)
+    if reply_help_result:
+        return reply_help_result
     global    msg_myfriend
     print('cccccccccccccc')
     try:
@@ -329,7 +335,7 @@ def reply_groups(msg):
         db[msg.chat.puid]='False'
         pass
     if msg.type is TEXT:
-        
+
         if '开启聊天' in msg.text.lower():
             db[msg.chat.puid]='True'
             return  '开启聊天'
@@ -357,6 +363,9 @@ def reply_groups(msg):
 @bot.register(groups, except_self=True)
 def wxpy_group(msg):
     print('222222222222222'+msg.type)
+    reply_help_result = reply_help(msg)
+    if reply_help_result:
+        return reply_help_result
     ret_msg = remote_kick(msg)
     print('222222222222222'+msg.type)
     global    msg_myfriend
@@ -428,6 +437,17 @@ def auto_replymp(msg):
  #       xiaoi.do_reply(msg)
  #       msg_myfriend=msg
 
+
+
+'''
+邀请消息处理
+'''
+def reply_help(msg):
+    if msg.type is TEXT:
+        if 'help' in msg.text.lower():
+            return invite_text
+        if '帮助' in msg.text.lower():
+            return invite_text
 
 
 @bot.register(groups, NOTE)
