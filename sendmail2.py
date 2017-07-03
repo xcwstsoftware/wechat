@@ -37,7 +37,7 @@ def mail(to_my_user):
     print("55ok")
     server.login(my_sender,"wst1987")  #括号中对应的是发件人邮箱账号、邮箱密码
     print("66ok")
-    server.sendmail(my_sender,[my_user,],msgRoot.as_string())  #括号中对应的是发件人邮箱账号、收件人邮箱账号、发送邮件
+    server.sendmail(my_sender,to_my_user,msgRoot.as_string())  #括号中对应的是发件人邮箱账号、收件人邮箱账号、发送邮件
     print("77ok")
     server.quit()  #这句是关闭连接的意思
   except Exception:  #如果try中的语句没有执行，则会执行下面的ret=False
