@@ -14,6 +14,8 @@ password = 'wst1987'
 
 # Create message container - the correct MIME type is multipart/alternative.
 msg = MIMEMultipart('alternative')
+msg['From']=formataddr(["tony",sender])   #括号里的对应发件人邮箱昵称、发件人邮箱账号
+msg['To']=formataddr(["美女/帅哥",receiver])   #括号里的对应收件人邮箱昵称、收件人邮箱账号
 msg['Subject'] = "Link"
 
 # Create the body of the message (a plain-text and an HTML version).
