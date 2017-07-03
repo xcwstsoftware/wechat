@@ -9,7 +9,7 @@ sender = 'wst584412572@163.com'
 receiver = '584412572@qq.com'
 subject = 'python email test'
 smtpserver = 'smtp.163.com'
-username = '584412572@qq.com'
+username = 'wst584412572@163.com'
 password = 'wst1987'
 
 # Create message container - the correct MIME type is multipart/alternative.
