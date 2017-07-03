@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 # coding: utf-8
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.keys import Keys
+import time
 
-import re
-
-key = r"javapythonhtmlvpythonhdpythonl"#这是源文本
-p1 = r"python"#这是我们写的正则表达式
-pattern1 = re.compile(p1)#同样是编译
-matcher1 = re.search(pattern1,key)#同样是查询
-print (matcher1.group(0))
-
-
-key = r"<html><body><h1>hello world<h1></body></html>"#这段是你要匹配的文本
-p1 = r"(?<=<h1>).+?(?=<h1>)"#这是我们写的正则表达式规则，你现在可以不理解啥意思
-pattern1 = re.compile(p1)#我们在编译这段正则表达式
-matcher1 = re.search(pattern1,key)#在源文本中搜索符合正则表达式的部分
-print (matcher1.group(0))#打印出来
+browser = webdriver.Firefox() # Get local session of firefox
+browser.get("http://www.yahoo.com") # Load page
+assert "Yahoo!" in browser.title
+elem = browser.find_element_by_name("p") # Find the query box
+elem.send_keys("seleniumhq" + Keys.RETURN)
+time.sleep(0.2) # Let the page load, will be added to the API
+try:
+    browser.find_element_by_xpath("//a[contains(@href,'http://seleniumhq.org')]")
+except NoSuchElementException:
+    assert 0, "can't find seleniumhq"
+browser.close()
