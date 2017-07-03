@@ -4,6 +4,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
+from email.utils import formataddr
 
 sender = 'wst584412572@163.com'
 receiver = '584412572@qq.com'
