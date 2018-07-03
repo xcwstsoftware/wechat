@@ -18,5 +18,5 @@ fb=open("B.txt",'a')
 for i in str:
     fb.write(i)
 
-fa.close()
+ fa.close()
 #fb.close()
